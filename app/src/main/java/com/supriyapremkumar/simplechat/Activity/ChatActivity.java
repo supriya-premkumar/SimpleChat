@@ -1,6 +1,7 @@
 package com.supriyapremkumar.simplechat.Activity;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -29,6 +30,9 @@ public class ChatActivity extends AppCompatActivity {
     static final String USER_ID_KEY = "userId";
     static final String BODY_KEY = "body";
     static final int MAX_CHAT_MESSAGES_TO_SHOW = 50;
+    // Create a handler which can run code periodically
+    static final int POLL_INTERVAL = 1000; // milliseconds
+
 
     EditText etMessage;
     Button btSend;
@@ -37,22 +41,33 @@ public class ChatActivity extends AppCompatActivity {
     ChatListAdapter mAdapter;
     boolean mFirstLoad;
 
+    Handler mHandler = new Handler();  // android.os.Handler
+    Runnable mRefreshMessagesRunnable = new Runnable() {
+        @Override
+        public void run() {
+            refreshMessages();
+            mHandler.postDelayed(this, POLL_INTERVAL);
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         //User login
-        if(ParseUser.getCurrentUser() != null){
+        if (ParseUser.getCurrentUser() != null) {
             startWithCurrentUser(); //start with existing user
-        }else{
+        } else {
             login();    //login as a new anonymous user
         }
+        mHandler.postDelayed(mRefreshMessagesRunnable, POLL_INTERVAL);
     }
 
-    public void messagePost(){
-        etMessage = (EditText)findViewById(R.id.etMessage);
-        btSend = (Button)findViewById(R.id.btSend);
-        lvChat = (ListView)findViewById(R.id.lvChat);
+    public void messagePost() {
+        etMessage = (EditText) findViewById(R.id.etMessage);
+        btSend = (Button) findViewById(R.id.btSend);
+        lvChat = (ListView) findViewById(R.id.lvChat);
         mMessages = new ArrayList<>();
         // Automatically scroll to the bottom when a data set
         // change notification is received and only if the last
@@ -77,9 +92,9 @@ public class ChatActivity extends AppCompatActivity {
                 message.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
-                            Toast.makeText(ChatActivity.this, "Successfully Created Message On Parse",
-                                    Toast.LENGTH_SHORT).show();
-                            refreshMessages();
+                        Toast.makeText(ChatActivity.this, "Successfully Created Message On Parse",
+                                Toast.LENGTH_SHORT).show();
+                        refreshMessages();
                     }
                 });
                 etMessage.setText(null);
@@ -93,13 +108,13 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     // Create an anonymous user using ParseAnonymousUtils and set sUserId
-    public void login(){
+    public void login() {
         ParseAnonymousUtils.logIn(new LogInCallback() {
             @Override
             public void done(ParseUser user, ParseException e) {
-                if(e != null){
+                if (e != null) {
                     Log.e(TAG, "Anonymous login failed", e);
-                }else{
+                } else {
                     startWithCurrentUser();
                 }
             }
@@ -107,7 +122,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     // Query messages from Parse so we can load them into the chat adapter
-    public void refreshMessages(){
+    public void refreshMessages() {
         // Construct query to execute
         ParseQuery<MessageModel> query = ParseQuery.getQuery(MessageModel.class);
         // Configure limit and sort order
@@ -136,4 +151,4 @@ public class ChatActivity extends AppCompatActivity {
 
 }
 
-}
+
