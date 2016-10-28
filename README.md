@@ -1,6 +1,7 @@
 # SimpleChat
 
 **SimpleChat** is an Android chat client with Parse Server deployed on Heroku
+
 Time spent:  **4** hours spent in total
 
 ![alt tag] (https://github.com/supriya-premkumar/SimpleChat/blob/master/app/src/main/res/drawable/Screen%20Shot%202016-10-27%20at%204.55.01%20PM.png)
